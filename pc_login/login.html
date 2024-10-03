@@ -17,7 +17,8 @@
             margin: 0;
         }
 
-        .login-container {
+        .login-container,
+        .otp-container {
             background-color: white;
             padding: 40px;
             border-radius: 10px;
@@ -31,7 +32,8 @@
         }
 
         input[type="text"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="number"] {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -60,6 +62,10 @@
             font-size: 0.9rem;
             display: none;
         }
+
+        .otp-container {
+            display: none;
+        }
     </style>
 </head>
 
@@ -67,7 +73,7 @@
 
     <div class="login-container">
         <h2>로그인</h2>
-        <form id="loginForm" action="/login" method="post">
+        <form id="loginForm" action="javascript:void(0);">
             <label for="username">ID:</label>
             <input type="text" id="username" name="username" placeholder="사용자 이름을 입력하세요" required>
 
@@ -75,24 +81,48 @@
             <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
 
             <button type="submit">Login</button>
-            <p class="error" id="error-message">사용자 이름 또는 비밀번호가 잘못되었습니다.</p>
+            <p class="error" id="login-error">사용자 이름 또는 비밀번호가 잘못되었습니다.</p>
+        </form>
+    </div>
+
+    <div class="otp-container">
+        <h2>OTP 인증</h2>
+        <form id="otpForm" action="javascript:void(0);">
+            <label for="otp">OTP:</label>
+            <input type="number" id="otp" name="otp" placeholder="OTP 번호를 입력하세요" required>
+            <button type="submit">Verify OTP</button>
+            <p class="error" id="otp-error">OTP 번호가 잘못되었습니다.</p>
         </form>
     </div>
 
     <script>
+        // 로그인 폼
         document.getElementById('loginForm').addEventListener('submit', function (event) {
-            // 실제로는 서버에서 검증을 해야 하지만, 이 예시에서는 클라이언트 측에서 가상으로 처리
             event.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
             // 간단한 클라이언트 측 검증 (테스트용)
             if (username === "admin" && password === "password") {
-                alert("로그인 성공!");
-                // 실제로는 서버로 POST 요청을 보내고 처리 결과를 받아야 함
-                window.location.href = "start.html";  // 로그인 성공 시 리다이렉트 (임의 페이지)
+                alert("로그인 성공! OTP 인증을 진행하세요.");
+                document.querySelector('.login-container').style.display = 'none';
+                document.querySelector('.otp-container').style.display = 'block';
             } else {
-                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('login-error').style.display = 'block';
+            }
+        });
+
+        // OTP 폼
+        document.getElementById('otpForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const otp = document.getElementById('otp').value;
+
+            // 간단한 OTP 검증 (테스트용, 실제로는 서버에서 확인해야 함)
+            if (otp === "123456") {
+                alert("OTP 인증 성공!");
+                window.location.href = "home.html"; // 성공 시 홈페이지로 리다이렉트
+            } else {
+                document.getElementById('otp-error').style.display = 'block';
             }
         });
     </script>
