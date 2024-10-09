@@ -89,7 +89,7 @@ class _MyHomePageState extends State<IDPWLoginPage> {
               const Padding(padding: EdgeInsets.only(top: 50)),
               const Center(
                 child: Image(
-                  image: AssetImage('images/cheesetrust_logo.png'),
+                  image: AssetImage('cheesetrust_logo.png'),
                   width: 170.0,
                 ),
               ),
