@@ -46,6 +46,28 @@ app.get('/users', (req, res) => {
   });
 });
 
+// OTP 생성 함수 (무작위 4자리 숫자)
+function generateOTP() {
+  return Math.floor(1000 + Math.random() * 9000).toString(); // 4자리 OTP 생성
+}
+
+// 유저별 OTP 저장 및 만료 시간 설정
+function saveOTP(userId, otp, callback) {
+  const expirationTime = new Date(Date.now() + 3 * 60 * 1000); // 3분 후 만료 시간 설정
+  const query = 'INSERT INTO otp (user_id, otp_code, expiration) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE otp_code = ?, expiration = ?';
+
+  connection.query(query, [userId, otp, expirationTime, otp, expirationTime], (error, results) => {
+    if (error) {
+      console.error('OTP 저장 실패:', error);
+      callback(error);
+      return;
+    }
+    console.log('OTP 저장 성공');
+    callback(null);
+  });
+}
+
+
 // 로그인 API 추가
 app.post('/login', (req, res) => {
   const { id, password } = req.body; // 요청 본문에서 id와 password 추출
@@ -63,7 +85,16 @@ app.post('/login', (req, res) => {
 
     if (results.length > 0) {
       // 로그인 성공
+      console.log('로그인 요청:', req.body);
+      const user = results[0];
+      const otp = generateOTP();
+      saveOTP(user.id, otp, (err) => {
+        if (err) {
+          return res.status(500).json({ message: 'OTP 저장 실패' });
+        }
+        console.log('요청된 OTP:', otp);
       res.status(200).json({ message: '로그인 성공' });
+      });
     } else {
       // 로그인 실패
       res.status(401).json({ message: '로그인 실패: 잘못된 ID 또는 비밀번호' });
@@ -72,5 +103,30 @@ app.post('/login', (req, res) => {
 });
 // 서버 시작
 app.listen(PORT, '0.0.0.0',() => {
-  console.log(`서버가 http://localhost:${PORT}에서 실행 중입니다.`);
+  console.log('서버가 http://localhost:${PORT}에서 실행 중입니다.');
+});
+
+// OTP 확인 API
+app.post('/verify-otp', (req, res) => {
+  const { id, otp } = req.body; // 클라이언트에서 전송된 id와 otp
+  console.log('요청된 userId:', id); // 요청된 userId 로그
+  console.log('요청된 OTP:', otp); // 요청된 OTP 로그
+
+  // 데이터베이스에서 OTP 확인 쿼리
+  const query = 'SELECT * FROM otp WHERE user_id = ? AND otp_code = ? AND expiration > NOW()';
+  connection.query(query, [id, otp], (error, results) => {
+    if (error) {
+      console.error('쿼리 실행 실패:', error);
+      return res.status(500).send('쿼리 실행 실패');
+    }
+
+    // OTP가 일치하고 유효한 경우
+    if (results.length > 0) {
+      res.status(200).json({ message: 'OTP 확인 성공' });
+    } else {
+      // OTP가 일치하지 않거나 만료된 경우
+      console.log('에러', results);
+      res.status(401).json({ message: 'OTP 확인 실패 또는 만료됨' });
+    }
+  });
 });
