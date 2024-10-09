@@ -60,7 +60,7 @@ class _MyHomePageState extends State<IDPWLoginPage> {
       showSnackBar(context, Text(responseData['message'])); // 수정된 부분
     }
   } catch (e) {
-    showSnackBar(context, Text('네트워크 오류가 발생했습니다. 다시 시도해 주세요.'));
+    showSnackBar(context, const Text('네트워크 오류가 발생했습니다. 다시 시도해 주세요.'));
   }
 }
 
@@ -70,13 +70,13 @@ class _MyHomePageState extends State<IDPWLoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ID/PW Login Page'),
+        title: const Text('ID/PW Login Page'),
         elevation: 0.0,
         backgroundColor: Colors.blue,
         centerTitle: true,
-        leading: IconButton(icon: Icon(Icons.menu), onPressed: () {}),
+        leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.search), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
         ],
       ),
       body: GestureDetector(
@@ -86,8 +86,8 @@ class _MyHomePageState extends State<IDPWLoginPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Padding(padding: EdgeInsets.only(top: 50)),
-              Center(
+              const Padding(padding: EdgeInsets.only(top: 50)),
+              const Center(
                 child: Image(
                   image: AssetImage('images/cheesetrust_logo.png'),
                   width: 170.0,
@@ -97,34 +97,34 @@ class _MyHomePageState extends State<IDPWLoginPage> {
                 child: Theme(
                   data: ThemeData(
                     primaryColor: Colors.grey,
-                    inputDecorationTheme: InputDecorationTheme(
+                    inputDecorationTheme: const InputDecorationTheme(
                       labelStyle: TextStyle(color: Colors.teal, fontSize: 15.0),
                     ),
                   ),
                   child: Container(
-                    padding: EdgeInsets.all(40.0),
+                    padding: const EdgeInsets.all(40.0),
                     child: Builder(builder: (context) {
                       return Column(
                         children: [
                           TextField(
                             controller: controller,
                             autofocus: true,
-                            decoration: InputDecoration(labelText: 'Enter ID'),
+                            decoration: const InputDecoration(labelText: 'Enter ID'),
                             keyboardType: TextInputType.emailAddress,
                           ),
                           TextField(
                             controller: controller2,
-                            decoration: InputDecoration(labelText: 'Enter PW'),
+                            decoration: const InputDecoration(labelText: 'Enter PW'),
                             keyboardType: TextInputType.text,
                             obscureText: true,
                           ),
-                          SizedBox(height: 40.0),
+                          const SizedBox(height: 40.0),
                           ButtonTheme(
                             minWidth: 100.0,
                             height: 50.0,
                             child: ElevatedButton(
                               onPressed: login, // 로그인 함수 호출
-                              child: Icon(
+                              child: const Icon(
                                 Icons.arrow_forward,
                                 color: Colors.white,
                                 size: 35.0,
@@ -150,7 +150,7 @@ class _MyHomePageState extends State<IDPWLoginPage> {
   void showSnackBar(BuildContext context, Text text) {
     final snackBar = SnackBar(
       content: text,
-      backgroundColor: Color.fromARGB(255, 112, 48, 48),
+      backgroundColor: const Color.fromARGB(255, 112, 48, 48),
     );
 
 // Find the ScaffoldMessenger in the widget tree
