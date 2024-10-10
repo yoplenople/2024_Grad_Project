@@ -38,35 +38,36 @@ class _MyHomePageState extends State<IDPWLoginPage> {
   TextEditingController controller2 = TextEditingController();
 
   Future<void> login() async {
-  try {
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:3000/mobile_login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'id': controller.text,
-        'password': controller2.text,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (BuildContext context) => OTPPage()),
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:3000/mobile_login'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'id': controller.text,
+          'password': controller2.text,
+        }),
       );
-    } else {
-      final responseData = json.decode(response.body);
-      showSnackBar(context, Text(responseData['message'])); // 수정된 부분
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        String userId = controller.text;
+        print(userId);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (BuildContext context) => OTPPage(userId: userId)),
+        );
+      } else {
+        final responseData = json.decode(response.body);
+        showSnackBar(context, Text('Im sad'));
+      }
+    } catch (e) {
+      showSnackBar(context, const Text('네트워크 오류가 발생했습니다. 다시 시도해 주세요.'));
     }
-  } catch (e) {
-    showSnackBar(context, const Text('네트워크 오류가 발생했습니다. 다시 시도해 주세요.'));
   }
-}
-
 
   @override
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -87,12 +88,7 @@ class _MyHomePageState extends State<IDPWLoginPage> {
           child: Column(
             children: [
               const Padding(padding: EdgeInsets.only(top: 50)),
-              const Center(
-                child: Image(
-                  image: AssetImage('cheesetrust_logo.png'),
-                  width: 170.0,
-                ),
-              ),
+              
               Form(
                 child: Theme(
                   data: ThemeData(
@@ -109,12 +105,14 @@ class _MyHomePageState extends State<IDPWLoginPage> {
                           TextField(
                             controller: controller,
                             autofocus: true,
-                            decoration: const InputDecoration(labelText: 'Enter ID'),
+                            decoration:
+                                const InputDecoration(labelText: 'Enter ID'),
                             keyboardType: TextInputType.emailAddress,
                           ),
                           TextField(
                             controller: controller2,
-                            decoration: const InputDecoration(labelText: 'Enter PW'),
+                            decoration:
+                                const InputDecoration(labelText: 'Enter PW'),
                             keyboardType: TextInputType.text,
                             obscureText: true,
                           ),

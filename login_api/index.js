@@ -106,6 +106,8 @@ app.post('/pc_login', (req, res) => {
   });
 });
 
+
+
 // 모바일 로그인 API 추가
 app.post('/mobile_login', (req, res) => {
   const { id, password } = req.body; // 요청 본문에서 id와 password 추출
@@ -128,20 +130,58 @@ app.post('/mobile_login', (req, res) => {
       const otp = generateOTP();
       connection.query('UPDATE user SET is_logged_in = TRUE WHERE id = ?', [user.id], (updateError) => {
         if (updateError) {
-          return res.status(500).json({ message: '로그인 상태 업데이트 실패' });
+          console.log('로그인 상태 업데이트 실패:', req.body);
+          return res.status(500).json({ message: '로그인 상태 업데이트 실패' });  
         }
         res.status(200).json({ message: '로그인 성공', otp });
+        console.log('로그인 성공:', req.body);
       });
     } else {
       // 로그인 실패
       res.status(401).json({ message: '로그인 실패: 잘못된 ID 또는 비밀번호' });
+      console.log('로그인 실패: 잘못된 ID 또는 비밀번호:', req.body);
+    }
+  });
+});
+
+// OTP 조회 API 추가
+app.get('/get_otp/:id', (req, res) => {
+  const userId = req.params.id; // URL 파라미터에서 userId 추출
+  console.log('모바일에서 OTP 요청');
+
+  // 데이터베이스에서 OTP 조회 쿼리
+  const query = 'SELECT otp_code FROM otp WHERE user_id = ? AND expiration > NOW()';
+  connection.query(query, [userId], (error, results) => {
+    if (error) {
+      console.error('쿼리 실행 실패:', error);
+      return res.status(500).send('쿼리 실행 실패');
+    }
+
+    // OTP가 존재하는 경우
+    if (results.length > 0) {
+      console.log(results);
+
+      const otp = results[0].otp_code; // OTP 코드 추출
+      res.status(200).json({ otp }); // OTP를 JSON 형식으로 응답
+    } else {
+      // OTP가 존재하지 않거나 만료된 경우
+      res.status(404).json({ message: 'OTP가 존재하지 않거나 만료되었습니다.' });
     }
   });
 });
 
 // 서버 시작
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('서버가 http://localhost:${PORT}에서 실행 중입니다.');
+  console.log(`서버가 http://localhost:${PORT}에서 실행 중입니다.`);
+
+  // 서버 시작 시 모든 유저의 is_logged_in을 false로 업데이트
+  connection.query('UPDATE user SET is_logged_in = FALSE', (error, results) => {
+    if (error) {
+      console.error('is_logged_in 업데이트 실패:', error);
+    } else {
+      console.log('모든 유저의 is_logged_in이 false로 업데이트되었습니다.');
+    }
+  });
 });
 
 // OTP 확인 API
