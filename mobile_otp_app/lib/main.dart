@@ -40,7 +40,7 @@ class _MyHomePageState extends State<IDPWLoginPage> {
   Future<void> login() async {
   try {
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:3000/login'),
+      Uri.parse('http://10.0.2.2:3000/mobile_login'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

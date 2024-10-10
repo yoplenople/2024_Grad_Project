@@ -101,9 +101,10 @@
             event.preventDefault();
             const username = document.getElementById('id').value;
             const password = document.getElementById('password').value;
+            const loginError = document.getElementById('login-error'); // 로그인 오류 메시지 요소
 
             // 간단한 클라이언트 측 검증 (테스트용)
-            fetch('http://localhost:3000/login', {
+            fetch('http://localhost:3000/pc_login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -113,7 +114,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.message === '로그인 성공') {
-                        alert('로그인 성공! OTP: ${data.otp}');
+                        alert(`로그인 성공! OTP: ${data.otp}`);
                         document.querySelector('.login-container').style.display = 'none';
                         document.querySelector('.otp-container').style.display = 'block';
                         userId = username;
@@ -122,8 +123,9 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                });
+                console.error('Error:', error);
+                loginError.style.display = 'block'; // 오류 발생 시 메시지 표시
+            });
         });
 
         // OTP 폼
@@ -150,8 +152,9 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                });
+                console.error('Error:', error);
+                otpError.style.display = 'block'; // 오류 발생 시 메시지 표시
+            });
 
         });
     </script>
