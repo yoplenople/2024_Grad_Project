@@ -82,6 +82,7 @@
 
             <button type="submit">Login</button>
             <p class="error" id="login-error">사용자 이름 또는 비밀번호가 잘못되었습니다.</p>
+            <p class="error" id="mobile-error" style="display: none;">모바일에서 먼저 로그인 해주세요.</p>
         </form>
     </div>
 
@@ -96,36 +97,51 @@
     </div>
     <script>
         // 로그인 폼
-        document.getElementById('loginForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-            const username = document.getElementById('id').value;
-            const password = document.getElementById('password').value;
-            const loginError = document.getElementById('login-error'); // 로그인 오류 메시지 요소
+document.getElementById('loginForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const username = document.getElementById('id').value;
+    const password = document.getElementById('password').value;
+    const loginError = document.getElementById('login-error'); // 로그인 오류 메시지 요소
+    const mobileError = document.getElementById('mobile-error'); // 모바일 오류 메시지 요소
 
-            // 간단한 클라이언트 측 검증
-            fetch('http://localhost:3000/pc_login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id: username, password: password })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message === '로그인 성공') {
-                        alert(`로그인 성공!`);
-                        document.querySelector('.login-container').style.display = 'none';
-                        document.querySelector('.otp-container').style.display = 'block';
-                        userId = username;
-                    } else {
-                        loginError.style.display = 'block';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    loginError.style.display = 'block'; // 오류 발생 시 메시지 표시
-                });
+    // 오류 메시지 초기화
+    loginError.style.display = 'none';
+    mobileError.style.display = 'none';
+
+    // 간단한 클라이언트 측 검증
+    fetch('http://localhost:3000/pc_login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: username, password: password })
+    })
+        .then(response => {
+            if (response.status === 403) {
+                // 모바일 오류 처리
+                mobileError.style.display = 'block';
+                throw new Error('Mobile error');
+            } else if (response.status === 401) {
+                // 로그인 오류 처리
+                loginError.style.display = 'block';
+                throw new Error('Login error');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.message === '로그인 성공') {
+                alert(`로그인 성공!`);
+                document.querySelector('.login-container').style.display = 'none';
+                document.querySelector('.otp-container').style.display = 'block';
+                userId = username;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // 이미 오류 메시지는 위에서 처리하므로 추가적인 처리는 필요 없음
         });
+});
+
 
         // OTP 폼
         document.getElementById('otpForm').addEventListener('submit', function (event) {
@@ -154,7 +170,6 @@
                     console.error('Error:', error);
                     otpError.style.display = 'block'; // 오류 발생 시 메시지 표시
                 });
-
         });
 
     </script>
