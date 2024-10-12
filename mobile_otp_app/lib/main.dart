@@ -59,8 +59,7 @@ class _MyHomePageState extends State<IDPWLoginPage> {
               builder: (BuildContext context) => OTPPage(userId: userId)),
         );
       } else {
-        final responseData = json.decode(response.body);
-        showSnackBar(context, Text('Im sad'));
+        showSnackBar(context, Text('로그인에 실패 했습니다'));
       }
     } catch (e) {
       showSnackBar(context, const Text('네트워크 오류가 발생했습니다. 다시 시도해 주세요.'));

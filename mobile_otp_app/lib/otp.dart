@@ -17,6 +17,7 @@ class _OTPPageState extends State<OTPPage> {
   String errorMessage = ''; // 오류 메시지를 저장할 변수
 
   @override
+
   void initState() {
     super.initState();
     fetchOTP(); // OTP를 가져오는 함수 호출
@@ -32,8 +33,6 @@ class _OTPPageState extends State<OTPPage> {
       final response = await http.get(
         Uri.parse('http://10.0.2.2:3000/get_otp/${widget.userId}'), // 서버의 로그인 API URL
       );
-      print('${widget.userId}');
-      print('서버 응답: ${response.body}'); // 서버 응답 로그
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -43,12 +42,10 @@ class _OTPPageState extends State<OTPPage> {
         });
       } else {
         setState(() {
-          errorMessage = '로그인 실패: ${response.body}';
           isLoading = false; // 로딩 완료
         });
       }
     } catch (e) {
-      print('오류 발생: $e'); // 오류 로그
       setState(() {
         errorMessage = '오류 발생: $e';
         isLoading = false; // 로딩 완료

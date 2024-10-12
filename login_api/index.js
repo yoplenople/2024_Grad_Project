@@ -182,6 +182,15 @@ app.listen(PORT, '0.0.0.0', () => {
       console.log('모든 유저의 is_logged_in이 false로 업데이트되었습니다.');
     }
   });
+
+  // 서버 시작 시 모든 OTP 삭제
+  connection.query('DELETE FROM otp', (error, results) => {
+    if (error) {
+      console.error('OTP 삭제 실패:', error);
+    } else {
+      console.log('모든 OTP가 삭제되었습니다.');
+    }
+  });
 });
 
 // OTP 확인 API

@@ -73,7 +73,7 @@
 
     <div class="login-container">
         <h2>로그인</h2>
-        <form id="loginForm" action="javascript:void(0);">
+        <form id="loginForm">
             <label for="id">ID:</label>
             <input type="text" id="id" name="id" placeholder="사용자 이름을 입력하세요" required>
 
@@ -87,14 +87,13 @@
 
     <div class="otp-container">
         <h2>OTP 인증</h2>
-        <form id="otpForm" action="javascript:void(0);">
+        <form id="otpForm">
             <label for="otp">OTP:</label>
             <input type="number" id="otp" name="otp" placeholder="OTP 번호를 입력하세요" required>
             <button type="submit">Verify OTP</button>
             <p class="error" id="otp-error">OTP 번호가 잘못되었습니다.</p>
         </form>
     </div>
-
     <script>
         // 로그인 폼
         document.getElementById('loginForm').addEventListener('submit', function (event) {
@@ -103,7 +102,7 @@
             const password = document.getElementById('password').value;
             const loginError = document.getElementById('login-error'); // 로그인 오류 메시지 요소
 
-            // 간단한 클라이언트 측 검증 (테스트용)
+            // 간단한 클라이언트 측 검증
             fetch('http://localhost:3000/pc_login', {
                 method: 'POST',
                 headers: {
@@ -123,9 +122,9 @@
                     }
                 })
                 .catch(error => {
-                console.error('Error:', error);
-                loginError.style.display = 'block'; // 오류 발생 시 메시지 표시
-            });
+                    console.error('Error:', error);
+                    loginError.style.display = 'block'; // 오류 발생 시 메시지 표시
+                });
         });
 
         // OTP 폼
@@ -152,13 +151,13 @@
                     }
                 })
                 .catch(error => {
-                console.error('Error:', error);
-                otpError.style.display = 'block'; // 오류 발생 시 메시지 표시
-            });
+                    console.error('Error:', error);
+                    otpError.style.display = 'block'; // 오류 발생 시 메시지 표시
+                });
 
         });
-    </script>
 
+    </script>
 </body>
 
 </html>
