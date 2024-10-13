@@ -54,18 +54,45 @@ function generateOTP() {
 // 유저별 OTP 저장 및 만료 시간 설정
 function saveOTP(userId, otp, callback) {
   const expirationTime = new Date(Date.now() + 3 * 60 * 1000); // 3분 후 만료 시간 설정
-  const query = 'INSERT INTO otp (user_id, otp_code, expiration) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE otp_code = ?, expiration = ?';
 
-  connection.query(query, [userId, otp, expirationTime, otp, expirationTime], (error, results) => {
-    if (error) {
-      console.error('OTP 저장 실패:', error);
-      callback(error);
+  // 이전 OTP 삭제 쿼리
+  const deleteQuery = 'DELETE FROM otp WHERE user_id = ?';
+  connection.query(deleteQuery, [userId], (deleteError) => {
+    if (deleteError) {
+      console.error('이전 OTP 삭제 실패:', deleteError);
+      callback(deleteError);
       return;
     }
-    console.log('OTP 저장 성공');
-    callback(null);
+
+    // 새로운 OTP 저장 쿼리
+    const query = 'INSERT INTO otp (user_id, otp_code, expiration) VALUES (?, ?, ?)';
+    connection.query(query, [userId, otp, expirationTime], (error, results) => {
+      if (error) {
+        console.error('OTP 저장 실패:', error);
+        callback(error);
+        return;
+      }
+      console.log('OTP 저장 성공');
+      callback(null);
+    });
   });
 }
+
+// OTP 재생성 코드 추가
+app.post('/regenerate-otp', (req, res) => {
+  const { id, password } = req.body;
+  console.log('ID: ', id, 'OTP 재발급');
+
+  const otp = generateOTP();
+  saveOTP(id, otp, (err) => {
+    if (err) {
+      return res.status(500).json({ message: 'OTP 저장 실패' });
+    }
+    console.log('요청된 OTP:', otp);
+    res.status(200).json({ message: '로그인 성공' });
+  });
+});
+
 
 // pc 로그인 API 추가
 app.post('/pc_login', (req, res) => {
@@ -127,13 +154,12 @@ app.post('/mobile_login', (req, res) => {
       // 로그인 성공
       console.log('로그인 요청:', req.body);
       const user = results[0];
-      const otp = generateOTP();
       connection.query('UPDATE user SET is_logged_in = TRUE WHERE id = ?', [user.id], (updateError) => {
         if (updateError) {
           console.log('로그인 상태 업데이트 실패:', req.body);
           return res.status(500).json({ message: '로그인 상태 업데이트 실패' });  
         }
-        res.status(200).json({ message: '로그인 성공', otp });
+        res.status(200).json({ message: '모바일 로그인 성공'});
         console.log('로그인 성공:', req.body);
       });
     } else {

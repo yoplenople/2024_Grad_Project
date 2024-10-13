@@ -94,53 +94,58 @@
             <button type="submit">Verify OTP</button>
             <p class="error" id="otp-error">OTP 번호가 잘못되었습니다.</p>
         </form>
+        <button id="regenerateOtpButton">OTP 재생성</button>
+        <div id="timer" style="margin-top: 10px; font-weight: bold;"></div> <!-- 타이머 표시 영역 -->
     </div>
+
     <script>
         // 로그인 폼
-document.getElementById('loginForm').addEventListener('submit', function (event) {
-    event.preventDefault();
-    const username = document.getElementById('id').value;
-    const password = document.getElementById('password').value;
-    const loginError = document.getElementById('login-error'); // 로그인 오류 메시지 요소
-    const mobileError = document.getElementById('mobile-error'); // 모바일 오류 메시지 요소
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const username = document.getElementById('id').value;
+            const password = document.getElementById('password').value;
+            const loginError = document.getElementById('login-error'); // 로그인 오류 메시지 요소
+            const mobileError = document.getElementById('mobile-error'); // 모바일 오류 메시지 요소
 
-    // 오류 메시지 초기화
-    loginError.style.display = 'none';
-    mobileError.style.display = 'none';
+            // 오류 메시지 초기화
+            loginError.style.display = 'none';
+            mobileError.style.display = 'none';
 
-    // 간단한 클라이언트 측 검증
-    fetch('http://localhost:3000/pc_login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id: username, password: password })
-    })
-        .then(response => {
-            if (response.status === 403) {
-                // 모바일 오류 처리
-                mobileError.style.display = 'block';
-                throw new Error('Mobile error');
-            } else if (response.status === 401) {
-                // 로그인 오류 처리
-                loginError.style.display = 'block';
-                throw new Error('Login error');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.message === '로그인 성공') {
-                alert(`로그인 성공!`);
-                document.querySelector('.login-container').style.display = 'none';
-                document.querySelector('.otp-container').style.display = 'block';
-                userId = username;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // 이미 오류 메시지는 위에서 처리하므로 추가적인 처리는 필요 없음
+            // 간단한 클라이언트 측 검증
+            fetch('http://localhost:3000/pc_login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: username, password: password })
+            })
+                .then(response => {
+                    if (response.status === 403) {
+                        // 모바일 오류 처리
+                        mobileError.style.display = 'block';
+                        throw new Error('Mobile error');
+                    } else if (response.status === 401) {
+                        // 로그인 오류 처리
+                        loginError.style.display = 'block';
+                        throw new Error('Login error');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.message === '로그인 성공') {
+                        alert(`로그인 성공!`);
+                        document.querySelector('.login-container').style.display = 'none';
+                        document.querySelector('.otp-container').style.display = 'block';
+                        userId = username;
+                        // 타이머 시작
+                        startTimer(3 * 60); // 3분 타이머 시작
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // 이미 오류 메시지는 위에서 처리하므로 추가적인 처리는 필요 없음
+                });
         });
-});
 
 
         // OTP 폼
@@ -171,6 +176,63 @@ document.getElementById('loginForm').addEventListener('submit', function (event)
                     otpError.style.display = 'block'; // 오류 발생 시 메시지 표시
                 });
         });
+
+        // OTP 재생성 버튼
+        document.getElementById('regenerateOtpButton').addEventListener('click', function () {
+            fetch('http://localhost:3000/regenerate-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: userId }) // userId를 포함하여 요청
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('OTP 재생성 실패');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('새로운 OTP가 생성되었습니다. 확인하세요.');
+                    console.log(data); // 필요한 경우 응답 데이터 처리
+                    // 타이머 시작
+                    startTimer(3 * 60); // 3분 타이머 시작
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('OTP 재생성 중 오류가 발생했습니다.');
+                });
+        });
+
+        // 타이머 시작 함수
+        function startTimer(duration) {
+            let timer = duration, minutes, seconds;
+            const timerDisplay = document.getElementById('timer');
+
+            // 타이머 초기화
+            timerDisplay.textContent = `남은 시간: 03:00`; // 초기값 설정
+
+            timerInterval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                // 2자리 수로 표시
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                timerDisplay.textContent = `남은 시간: ${minutes}:${seconds}`;
+
+                // 타이머 감소
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = "OTP 유효시간이 만료되었습니다."; // 타이머 만료 메시지
+                    alert('OTP 유효시간이 만료되었습니다. OTP를 재생성하세요.'); // 알림
+                } else {
+                    timer--; // 타이머 감소
+                }
+            }, 1000);
+        }
+
 
     </script>
 </body>
