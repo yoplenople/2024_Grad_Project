@@ -198,7 +198,7 @@ app.get('/get_otp/:id', (req, res) => {
 
     // OTP가 존재하는 경우
     if (results.length > 0) {
-      console.log(results);
+      console.log('OTP 코드: ', results[0].otp_code);
 
       const otp = results[0].otp_code; // OTP 코드 추출
       res.status(200).json({ otp }); // OTP를 JSON 형식으로 응답
