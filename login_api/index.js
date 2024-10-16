@@ -2,6 +2,8 @@ const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const fs = require('fs'); // fs 모듈 추가
+const path = require('path'); // path 모듈 추가
 
 const app = express();
 const PORT = 3000;
@@ -28,6 +30,17 @@ connection.connect((err) => {
 // 미들웨어 설정
 app.use(bodyParser.json()); // JSON 요청 본문을 파싱하기 위한 미들웨어
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// 로그 기록 함수
+function logAction(userId, action, success) {
+  const timestamp = new Date().toISOString(); // 현재 날짜와 시간
+  const logMessage = `${timestamp} - User: ${userId}, Action: ${action}, Success: ${success}\n`;
+  fs.appendFile(path.join(__dirname, 'log.txt'), logMessage, (err) => {
+    if (err) {
+      console.error('로그 기록 실패:', err);
+    }
+  });
+}
 
 // 루트 경로에 대한 GET 요청 처리
 app.get('/', (req, res) => {
