@@ -170,9 +170,9 @@ app.post('/mobile_login', (req, res) => {
       connection.query('UPDATE user SET is_logged_in = TRUE WHERE id = ?', [user.id], (updateError) => {
         if (updateError) {
           console.log('로그인 상태 업데이트 실패:', req.body);
-          return res.status(500).json({ message: '로그인 상태 업데이트 실패' });  
+          return res.status(500).json({ message: '로그인 상태 업데이트 실패' });
         }
-        res.status(200).json({ message: '모바일 로그인 성공'});
+        res.status(200).json({ message: '모바일 로그인 성공' });
         console.log('로그인 성공:', req.body);
       });
     } else {
@@ -182,6 +182,21 @@ app.post('/mobile_login', (req, res) => {
     }
   });
 });
+
+// 모바일 로그아웃 API 추가
+app.post('/mobile_logout/:id', (req, res) => {
+  const userId = req.params.id; // URL 파라미터에서 userId 추출
+
+  connection.query('UPDATE user SET is_logged_in = FALSE WHERE id = ?', [userId], (updateError) => {
+    if (updateError) {
+      console.log('로그인 상태 업데이트 실패:', req.body);
+      return res.status(500).json({ message: '로그인 상태 업데이트 실패' });
+    }
+    res.status(200).json({ message: '모바일 로그아웃 성공' });
+    console.log('모바일 로그아웃 성공:', req.body);
+  });
+}
+);
 
 // OTP 조회 API 추가
 app.get('/get_otp/:id', (req, res) => {

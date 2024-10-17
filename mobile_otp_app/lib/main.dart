@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const IDPWLoginPage(title: 'ID/PW Login Page'),
+      debugShowCheckedModeBanner: false, // 디버그 배너 끄기
     );
   }
 }
@@ -68,76 +69,78 @@ class _MyHomePageState extends State<IDPWLoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ID/PW Login Page'),
-        elevation: 0.0,
-        backgroundColor: Colors.blue,
-        centerTitle: true,
-        leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
-        actions: <Widget>[
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-        ],
-      ),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const Padding(padding: EdgeInsets.only(top: 50)),
-              
-              Form(
-                child: Theme(
-                  data: ThemeData(
-                    primaryColor: Colors.grey,
-                    inputDecorationTheme: const InputDecorationTheme(
-                      labelStyle: TextStyle(color: Colors.teal, fontSize: 15.0),
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Text('ID/PW Login Page'),
+          elevation: 0.0,
+          backgroundColor: Colors.blue,
+          centerTitle: true,
+        ),
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const Padding(padding: EdgeInsets.only(top: 50)),
+                Form(
+                  child: Theme(
+                    data: ThemeData(
+                      primaryColor: Colors.grey,
+                      inputDecorationTheme: const InputDecorationTheme(
+                        labelStyle:
+                            TextStyle(color: Colors.teal, fontSize: 15.0),
+                      ),
                     ),
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.all(40.0),
-                    child: Builder(builder: (context) {
-                      return Column(
-                        children: [
-                          TextField(
-                            controller: controller,
-                            autofocus: true,
-                            decoration:
-                                const InputDecoration(labelText: 'Enter ID'),
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-                          TextField(
-                            controller: controller2,
-                            decoration:
-                                const InputDecoration(labelText: 'Enter PW'),
-                            keyboardType: TextInputType.text,
-                            obscureText: true,
-                          ),
-                          const SizedBox(height: 40.0),
-                          ButtonTheme(
-                            minWidth: 100.0,
-                            height: 50.0,
-                            child: ElevatedButton(
-                              onPressed: login, // 로그인 함수 호출
-                              child: const Icon(
-                                Icons.arrow_forward,
-                                color: Colors.white,
-                                size: 35.0,
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orangeAccent,
+                    child: Container(
+                      padding: const EdgeInsets.all(40.0),
+                      child: Builder(builder: (context) {
+                        return Column(
+                          children: [
+                            TextField(
+                              controller: controller,
+                              autofocus: true,
+                              decoration:
+                                  const InputDecoration(labelText: 'Enter ID'),
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            TextField(
+                              controller: controller2,
+                              decoration:
+                                  const InputDecoration(labelText: 'Enter PW'),
+                              keyboardType: TextInputType.text,
+                              obscureText: true,
+                            ),
+                            const SizedBox(height: 40.0),
+                            ButtonTheme(
+                              minWidth: 100.0,
+                              height: 50.0,
+                              child: ElevatedButton(
+                                onPressed: login, // 로그인 함수 호출
+                                child: const Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                  size: 35.0,
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orangeAccent,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      );
-                    }),
+                          ],
+                        );
+                      }),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
