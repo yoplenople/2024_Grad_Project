@@ -32,9 +32,9 @@ app.use(bodyParser.json()); // JSON 요청 본문을 파싱하기 위한 미들�
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // 로그 기록 함수
-function logAction(userId, action, success) {
+function logAction(userId, action, result, issue) {
   const timestamp = new Date().toISOString(); // 현재 날짜와 시간
-  const logMessage = `${timestamp} - User: ${userId}, Action: ${action}, Success: ${success}\n`;
+  const logMessage = `${timestamp} - User: ${userId}, Action: ${action}, ${result}, ${issue}\n`;
   fs.appendFile(path.join(__dirname, 'log.txt'), logMessage, (err) => {
     if (err) {
       console.error('로그 기록 실패:', err);
@@ -99,10 +99,11 @@ app.post('/regenerate-otp', (req, res) => {
   const otp = generateOTP();
   saveOTP(id, otp, (err) => {
     if (err) {
+      logAction(id, 'OTP 재발급', '실패', '재발급 실패');
       return res.status(500).json({ message: 'OTP 저장 실패' });
     }
-    console.log('요청된 OTP:', otp);
-    res.status(200).json({ message: '로그인 성공' });
+    res.status(200).json({ message: 'OTP 재발급 성공' });
+    logAction(id, 'OTP 재발급', '성공', '');
   });
 });
 
@@ -110,7 +111,7 @@ app.post('/regenerate-otp', (req, res) => {
 // pc 로그인 API 추가
 app.post('/pc_login', (req, res) => {
   const { id, password } = req.body; // 요청 본문에서 id와 password 추출
-  console.log('ID: ', id, 'Password: ', password);
+  console.log('ID: ', id);
 
   if (!id || !password) {
     return res.status(400).json({ message: 'ID와 비밀번호를 입력해 주세요.' });
@@ -124,23 +125,27 @@ app.post('/pc_login', (req, res) => {
 
     if (results.length > 0) {
       // 로그인 성공
-      console.log('로그인 요청:', req.body);
+      console.log('로그인 요청:', id);
       const user = results[0];
       // 모바일에서 로그인했는지 확인
       if (!user.is_logged_in) {
+        logAction(user.id, '로그인', '실패', '모바일 미로그인');
         return res.status(403).json({ message: '모바일에서 먼저 로그인 해주세요.' });
       } else {
         const otp = generateOTP();
         saveOTP(user.id, otp, (err) => {
           if (err) {
+            logAction(user.id, '로그인', '실패','OTP 저장 실패');
             return res.status(500).json({ message: 'OTP 저장 실패' });
           }
-          console.log('요청된 OTP:', otp);
+          logAction(user.id, '로그인', '성공', '');
           res.status(200).json({ message: '로그인 성공' });
         });
       }
     } else {
       // 로그인 실패
+      logAction(id, '로그인', '실패', '잘못된 ID 또는 비밀번호');
+      console.log('로그인 실패: 잘못된 ID 또는 비밀번호');
       res.status(401).json({ message: '로그인 실패: 잘못된 ID 또는 비밀번호' });
     }
   });
@@ -151,7 +156,7 @@ app.post('/pc_login', (req, res) => {
 // 모바일 로그인 API 추가
 app.post('/mobile_login', (req, res) => {
   const { id, password } = req.body; // 요청 본문에서 id와 password 추출
-  console.log('ID: ', id, 'Password: ', password);
+  console.log('ID: ', id);
 
   if (!id || !password) {
     return res.status(400).json({ message: 'ID와 비밀번호를 입력해 주세요.' });
@@ -165,20 +170,22 @@ app.post('/mobile_login', (req, res) => {
 
     if (results.length > 0) {
       // 로그인 성공
-      console.log('로그인 요청:', req.body);
+      console.log('로그인 요청:', id);
       const user = results[0];
       connection.query('UPDATE user SET is_logged_in = TRUE WHERE id = ?', [user.id], (updateError) => {
         if (updateError) {
-          console.log('로그인 상태 업데이트 실패:', req.body);
+          console.log('로그인 상태 업데이트 실패:', id);
           return res.status(500).json({ message: '로그인 상태 업데이트 실패' });
         }
+        logAction(user.id, '모바일 로그인', '성공', '');
         res.status(200).json({ message: '모바일 로그인 성공' });
-        console.log('로그인 성공:', req.body);
+        console.log('로그인 성공:', id);
       });
     } else {
       // 로그인 실패
+      logAction(id, '모바일 로그인', '실패', '잘못된 ID 또는 비밀번호');
       res.status(401).json({ message: '로그인 실패: 잘못된 ID 또는 비밀번호' });
-      console.log('로그인 실패: 잘못된 ID 또는 비밀번호:', req.body);
+      console.log('로그인 실패: 잘못된 ID 또는 비밀번호:', id);
     }
   });
 });
@@ -189,11 +196,12 @@ app.post('/mobile_logout/:id', (req, res) => {
 
   connection.query('UPDATE user SET is_logged_in = FALSE WHERE id = ?', [userId], (updateError) => {
     if (updateError) {
-      console.log('로그인 상태 업데이트 실패:', req.body);
+      console.log('로그인 상태 업데이트 실패:', userId);
       return res.status(500).json({ message: '로그인 상태 업데이트 실패' });
     }
+    logAction(userId, '모바일 로그아웃', '성공', '');
     res.status(200).json({ message: '모바일 로그아웃 성공' });
-    console.log('모바일 로그아웃 성공:', req.body);
+    console.log('모바일 로그아웃 성공:', userId);
   });
 }
 );
@@ -263,9 +271,11 @@ app.post('/verify-otp', (req, res) => {
 
     // OTP가 일치하고 유효한 경우
     if (results.length > 0) {
+      logAction(id, 'OTP 인증', '성공', '');
       res.status(200).json({ message: 'OTP 확인 성공' });
     } else {
       // OTP가 일치하지 않거나 만료된 경우
+      logAction(id, 'OTP 인증', '실패', '만료 또는 잘못된 OTP');
       console.log('에러', results);
       res.status(401).json({ message: 'OTP 확인 실패 또는 만료됨' });
     }
