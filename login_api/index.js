@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const fs = require('fs'); // fs 모듈 추가
 const path = require('path'); // path 모듈 추가
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = 3000;
@@ -272,6 +273,7 @@ app.post('/verify-otp', (req, res) => {
     // OTP가 일치하고 유효한 경우
     if (results.length > 0) {
       logAction(id, 'OTP 인증', '성공', '');
+      const token = jwt.sign({ userId: id }, 'grad-project', { expiresIn: '1h' }); // grad-project == secret key
       res.status(200).json({ message: 'OTP 확인 성공' });
     } else {
       // OTP가 일치하지 않거나 만료된 경우
