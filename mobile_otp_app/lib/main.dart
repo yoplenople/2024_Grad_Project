@@ -35,8 +35,15 @@ class IDPWLoginPage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<IDPWLoginPage> {
-  TextEditingController controller = TextEditingController();
-  TextEditingController controller2 = TextEditingController();
+  final TextEditingController controller = TextEditingController();
+  final TextEditingController controller2 = TextEditingController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    controller2.dispose();
+    super.dispose();
+  }
 
   Future<void> login() async {
     try {
@@ -50,28 +57,33 @@ class _MyHomePageState extends State<IDPWLoginPage> {
           'password': controller2.text,
         }),
       );
-      print(response.statusCode);
       if (response.statusCode == 200) {
         String userId = controller.text;
-        print(userId);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) => OTPPage(userId: userId)),
-        );
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => OTPPage(userId: userId)),
+          );
+        }
       } else {
-        showSnackBar(context, Text('로그인에 실패 했습니다'));
+        if (context.mounted) {
+          showSnackBar(context, const Text('로그인에 실패 했습니다'));
+        }
       }
     } catch (e) {
-      showSnackBar(context, const Text('네트워크 오류가 발생했습니다. 다시 시도해 주세요.'));
+      if (context.mounted) {
+        showSnackBar(context, const Text('네트워크 오류가 발생했습니다. 다시 시도해 주세요.'));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        return;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -123,13 +135,13 @@ class _MyHomePageState extends State<IDPWLoginPage> {
                               height: 50.0,
                               child: ElevatedButton(
                                 onPressed: login, // 로그인 함수 호출
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orangeAccent,
+                                ),
                                 child: const Icon(
                                   Icons.arrow_forward,
                                   color: Colors.white,
                                   size: 35.0,
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orangeAccent,
                                 ),
                               ),
                             ),

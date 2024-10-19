@@ -9,7 +9,7 @@ class OTPPage extends StatefulWidget {
   const OTPPage({super.key, required this.userId});
 
   @override
-  _OTPPageState createState() => _OTPPageState();
+  State<OTPPage> createState() => _OTPPageState();
 }
 
 class _OTPPageState extends State<OTPPage> {
@@ -67,26 +67,33 @@ class _OTPPageState extends State<OTPPage> {
       );
       if (response.statusCode == 200) {
         // 로그아웃 성공 시
-        showSnackBar(context, const Text('로그아웃 성공'));
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  IDPWLoginPage(title: "ID/PW Login Page")),
-        );
+        if (context.mounted) {
+          showSnackBar(context, const Text('로그아웃 성공'));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    const IDPWLoginPage(title: "ID/PW Login Page")),
+          );
+        }
       } else {
-        showSnackBar(context, const Text('로그아웃 실패'));
+        if (context.mounted) {
+          showSnackBar(context, const Text('로그아웃 실패'));
+        }
       }
     } catch (e) {
-      print(e);
+      if (context.mounted) {
+        showSnackBar(context, const Text('네트워크 오류가 발생했습니다. 다시 시도해 주세요.'));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        return;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -97,7 +104,6 @@ class _OTPPageState extends State<OTPPage> {
               icon: const Icon(Icons.logout), // 로그아웃 아이콘
               onPressed: () {
                 logout();
-                print('로그아웃 버튼 클릭됨');
               },
             ),
           ],
