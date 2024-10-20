@@ -34,7 +34,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // 로그 기록 함수
 function logAction(userId, action, result, issue) {
-  const timestamp = new Date().toISOString(); // 현재 날짜와 시간
+  const timestamp = new Date().toISOString(
+    { 
+      timeZone: 'Asia/Seoul',
+      hour12: false,
+     }
+  ); // 현재 날짜와 시간
   const logMessage = `${timestamp} - User: ${userId}, Action: ${action}, ${result}, ${issue}\n`;
   fs.appendFile(path.join(__dirname, 'log.txt'), logMessage, (err) => {
     if (err) {
