@@ -67,6 +67,7 @@
             display: none;
         }
 
+        /* number 입력 칸에 up, down 화살표 표시 안되게 하기 */
         /* Chrome, Safari, Edge, Opera */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
@@ -192,7 +193,7 @@
                     if (response.ok) {
                         console.log('Token verified successfully');
                         const url = response.url;
-                        window.location.href = url; // Redirect to home page
+                        window.location.href = url; // home.html로 디렉팅
                         console.error('Error verifying token:', response.status);
                     }
                 })
@@ -226,31 +227,31 @@
 
         // 타이머 시작 함수
         function startTimer() {
-            // Remove existing countdown div
+            // 기존에 있는 countdown div 삭제
             const timerDiv = document.getElementById('timer');
             const countdownDiv = timerDiv.querySelector('.countdown');
             if (countdownDiv) {
                 timerDiv.removeChild(countdownDiv);
             }
 
-            // Create new countdown div
+            // 새로운 countdown div 생성
             const newCountdownDiv = document.createElement('div');
             newCountdownDiv.className = 'countdown';
             timerDiv.appendChild(newCountdownDiv);
 
-            // Set initial time
-            let time = 180; // 3 minutes in seconds
+            // 초기 시간 설정
+            let time = 180; // 3분을 초 단위로 표시
 
-            // Update countdown every second
+            // 매 초 countdown 업데이트
             const intervalId = setInterval(() => {
                 const minutes = Math.floor(time / 60);
                 const seconds = time % 60;
                 newCountdownDiv.textContent = `남은 시간 ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-                // Decrement time
+                // 시간 감소
                 time--;
 
-                // Clear interval and show alert when time reaches 0
+                // interval 삭제 후 alert문 표시
                 if (time < 0) {
                     clearInterval(intervalId);
                     alert('OTP가 만료 되었습니다. 재생성 하십시오.');

@@ -5,8 +5,8 @@ const PORT = 4000;
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
 
-app.use(express.json()); // for parsing application/json
-app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(express.json()); // application/json으로 파싱 하기 위함
+app.use(express.urlencoded({ extended: true })); // application/x-www-form-urlencode으로 파싱하기 위함
 app.use(session({
     secret: 'secret-key',
     resave: false,
@@ -75,7 +75,7 @@ function sendLogMemo(userId, action, result, issue) {
 app.post('/logout', (req, res) => {
     jwt.verify(req.session.token, 'grad-project', (err, decoded) => {
         if (err) {
-            // Handle token verification error
+            // 토큰 인증 관련 에러
             console.error('Error verifying token:', err);
             return res.status(401).send('Unauthorized: Invalid token');
         }

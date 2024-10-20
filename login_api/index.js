@@ -1,23 +1,24 @@
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2'); // 해당 프로젝트에선 mysql을 데이터베이스로 사용함
+// 만약 mysql이 아닌 다른 db를 연결 원하면 위 줄 삭제 후 해당 db 데이터 여기에 작성
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const fs = require('fs'); // fs 모듈 추가
 const path = require('path'); // path 모듈 추가
 const jwt = require('jsonwebtoken');
-const { log } = require('console');
 
 const app = express();
-const PORT = 3000;
+const PORT = 3000; // 서버를 운용할 PORT 번호 입력
 
 app.use(cors()); //모든 도메인에서의 요청 허용
 
 // MySQL 데이터베이스 연결 설정
-const connection = mysql.createConnection({
-  host: 'localhost', // 데이터베이스 호스트
-  user: 'root', // MySQL 사용자 이름
-  password: '0000', // MySQL 비밀번호
-  database: 'my_login_db' // 사용할 데이터베이스 이름
+// 다른 데이터베이스 사용 시 해당 내용 변경 필요
+const connection = mysql.createConnection({   // connection이라는 연결 변수 선언. 앞으로 db와의 연결은 connection으로 호출
+  host: 'localhost', // 데이터베이스 호스트 **알맞게 변경 **
+  user: 'root', // MySQL 사용자 이름  **알맞게 변경 **
+  password: '0000', // MySQL 비밀번호 **알맞게 변경 **
+  database: 'my_login_db' // 사용할 데이터베이스 이름 **알맞게 변경 **
 });
 
 // 데이터베이스 연결
@@ -31,7 +32,7 @@ connection.connect((err) => {
 
 // 미들웨어 설정
 app.use(bodyParser.json()); // JSON 요청 본문을 파싱하기 위한 미들웨어
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true })); // encoding 된 본문을 파싱하기 위한 미들웨어
 
 // 로그 기록 함수
 function logAction(userId, action, result, issue) {
@@ -58,12 +59,12 @@ app.post('/logActivity', (req, res) => {
 
 // 루트 경로에 대한 GET 요청 처리
 app.get('/', (req, res) => {
-  res.send('Hello, World!');
+  res.send('인증 서버 실행 중');
 });
 
 // 사용자 데이터 조회 API
 app.get('/users', (req, res) => {
-  connection.query('SELECT * FROM user', (error, results) => {
+  connection.query('SELECT * FROM user', (error, results) => {  // 사용하는 DB 문법에 맞게 수정
     if (error) {
       console.error('쿼리 실행 실패:', error);
       res.status(500).send('쿼리 실행 실패');
