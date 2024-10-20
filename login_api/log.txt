@@ -462,3 +462,4 @@
 2024-10-20T09:11:29.456Z - User: nami, Action: 로그인, 성공, 
 2024-10-20T09:16:02.848Z - User: nami, Action: 로그인, 성공, 
 2024-10-20T09:16:08.239Z - User: nami, Action: OTP 재발급, 성공, 
+2024-10-20T09:17:36.579Z - User: nami, Action: OTP 재발급, 성공, 
