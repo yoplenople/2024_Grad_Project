@@ -146,7 +146,7 @@ class _OTPPageState extends State<OTPPage> {
 void showSnackBar(BuildContext context, Text text) {
   final snackBar = SnackBar(
     content: text,
-    backgroundColor: const Color.fromARGB(255, 112, 48, 48),
+    backgroundColor: const Color.fromARGB(255, 0, 217, 255),
   );
 
 // Find the ScaffoldMessenger in the widget tree

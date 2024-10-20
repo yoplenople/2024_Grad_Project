@@ -29,7 +29,10 @@ app.get('/home.html', (req, res) => {
         req.session.token = token;
     }
     if (!req.session.token) {
-        return res.status(401).send('Unauthorized: No token provided');
+        return res.status(401).send(`
+        <h1>접근권한 없음. 로그인 후 이용 해주세요.</h1>
+        <button onclick="window.location.href='http://localhost:4000/'">로그인 페이지로 이동</button>
+    `);
     }
     jwt.verify(req.session.token, 'grad-project', (err, decoded) => {
 
