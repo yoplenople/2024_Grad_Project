@@ -48,6 +48,17 @@ function handleHomePage(req, res) {
     res.sendFile(path.join(__dirname, 'home.html'));
 }
 
+// 로그아웃 기능 처리
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Error destroying session:', err);
+      } else {
+        res.json({ message: 'Logged out successfully' });
+      }
+    });
+  });
+
 //404 처리
 app.use((req, res) => {
     res.status(404).send('404: 페이지를 찾을 수 없습니다.');

@@ -438,3 +438,13 @@
 2024-10-20T08:36:45.033Z - User: nami, Action: 로그인, 성공, 
 2024-10-20T08:36:50.490Z - User: nami, Action: OTP 인증, 성공, 
 2024-10-20T08:38:29.316Z - User: nami, Action: 모바일 로그아웃, 성공, 
+2024-10-20T08:41:07.735Z - User: nami, Action: 로그인, 실패, 모바일 미로그인
+2024-10-20T08:41:16.020Z - User: nami, Action: 모바일 로그인, 성공, 
+2024-10-20T08:41:18.222Z - User: nami, Action: 로그인, 성공, 
+2024-10-20T08:41:24.670Z - User: nami, Action: OTP 인증, 성공, 
+2024-10-20T08:46:39.477Z - User: nami, Action: 로그인, 실패, 잘못된 ID 또는 비밀번호
+2024-10-20T08:46:42.092Z - User: nami, Action: 로그인, 성공, 
+2024-10-20T08:47:03.545Z - User: nami, Action: 모바일 로그인, 성공, 
+2024-10-20T08:47:10.339Z - User: nami, Action: OTP 인증, 성공, 
+2024-10-20T08:47:28.209Z - User: nami, Action: 로그인, 성공, 
+2024-10-20T08:47:34.693Z - User: nami, Action: OTP 인증, 성공, 
