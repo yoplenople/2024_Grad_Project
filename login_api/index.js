@@ -5,6 +5,7 @@ const cors = require('cors');
 const fs = require('fs'); // fs 모듈 추가
 const path = require('path'); // path 모듈 추가
 const jwt = require('jsonwebtoken');
+const { log } = require('console');
 
 const app = express();
 const PORT = 3000;
@@ -47,6 +48,13 @@ function logAction(userId, action, result, issue) {
     }
   });
 }
+
+// 외부에서 로그에 기록 할 수 있게 하는 API
+app.post('/logActivity', (req, res) => {
+  const { userId, action, result, issue } = req.body;
+  logAction(userId, action, result, issue);
+  res.status(200).json({ message: 'Activity logged successfully' });
+});
 
 // 루트 경로에 대한 GET 요청 처리
 app.get('/', (req, res) => {
@@ -240,6 +248,7 @@ app.get('/get_otp/:id', (req, res) => {
 
 // 서버 시작
 app.listen(PORT, '0.0.0.0', () => {
+  logAction('-----서버-----', '서버 재실행', '성공', '');
   console.log(`서버가 http://localhost:${PORT}에서 실행 중입니다.`);
 
   // 서버 시작 시 모든 유저의 is_logged_in을 false로 업데이트
@@ -279,6 +288,7 @@ app.post('/verify-otp', (req, res) => {
     if (results.length > 0) {
       logAction(id, 'OTP 인증', '성공', '');
       const token = jwt.sign({ userId: id }, 'grad-project', { expiresIn: '1h' }); // grad-project == secret key
+      logAction(id, '토큰 생성', '성공', '');
       res.status(200).json({ message: '성공', token: token });
     } else {
       // OTP가 일치하지 않거나 만료된 경우
