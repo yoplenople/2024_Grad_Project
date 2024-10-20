@@ -274,7 +274,7 @@ app.post('/verify-otp', (req, res) => {
     if (results.length > 0) {
       logAction(id, 'OTP 인증', '성공', '');
       const token = jwt.sign({ userId: id }, 'grad-project', { expiresIn: '1h' }); // grad-project == secret key
-      res.status(200).json({ message: 'OTP 확인 성공' });
+      res.status(200).json({ message: '성공', token: token });
     } else {
       // OTP가 일치하지 않거나 만료된 경우
       logAction(id, 'OTP 인증', '실패', '만료 또는 잘못된 OTP');
