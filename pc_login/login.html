@@ -134,7 +134,7 @@
                         document.querySelector('.otp-container').style.display = 'block';
                         userId = username;
                         // 타이머 시작
-                        startTimer(3 * 60); // 3분 타이머 시작
+                        startTimer(); // 3분 타이머 시작
                     }
                     else if (response.status === 403) {
                         // 모바일 오류 처리
@@ -214,7 +214,7 @@
                     if (response.status === 200) {
                         alert('새로운 OTP가 생성되었습니다. 확인하세요.');
                         // 타이머 시작
-                        startTimer(3 * 60); // 3분 타이머 시작
+                        startTimer(); // 3분 타이머 시작
                     } else if (response.status === 500) {
                         alert('OTP 저장에 실패했습니다');
                     } else {
@@ -225,32 +225,37 @@
         });
 
         // 타이머 시작 함수
-        function startTimer(duration) {
-            let timer = duration, minutes, seconds;
-            const timerDisplay = document.getElementById('timer');
+        function startTimer() {
+            // Remove existing countdown div
+            const timerDiv = document.getElementById('timer');
+            const countdownDiv = timerDiv.querySelector('.countdown');
+            if (countdownDiv) {
+                timerDiv.removeChild(countdownDiv);
+            }
 
-            // 타이머 초기화
-            timerDisplay.textContent = `남은 시간: 03:00`; // 초기값 설정
+            // Create new countdown div
+            const newCountdownDiv = document.createElement('div');
+            newCountdownDiv.className = 'countdown';
+            timerDiv.appendChild(newCountdownDiv);
 
-            timerInterval = setInterval(function () {
-                minutes = parseInt(timer / 60, 10);
-                seconds = parseInt(timer % 60, 10);
+            // Set initial time
+            let time = 180; // 3 minutes in seconds
 
-                // 2자리 수로 표시
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                seconds = seconds < 10 ? "0" + seconds : seconds;
+            // Update countdown every second
+            const intervalId = setInterval(() => {
+                const minutes = Math.floor(time / 60);
+                const seconds = time % 60;
+                newCountdownDiv.textContent = `남은 시간 ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-                timerDisplay.textContent = `남은 시간: ${minutes}:${seconds}`;
+                // Decrement time
+                time--;
 
-                // 타이머 감소
-                if (timer <= 0) {
-                    clearInterval(timerInterval);
-                    timerDisplay.textContent = "OTP 유효시간이 만료되었습니다."; // 타이머 만료 메시지
-                    alert('OTP 유효시간이 만료되었습니다. OTP를 재생성하세요.'); // 알림
-                } else {
-                    timer--; // 타이머 감소
+                // Clear interval and show alert when time reaches 0
+                if (time < 0) {
+                    clearInterval(intervalId);
+                    alert('OTP가 만료 되었습니다. 재생성 하십시오.');
                 }
-            }, 1000);
+            }, 1000); // 1000 milliseconds = 1 second
         }
 
 
