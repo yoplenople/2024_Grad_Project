@@ -38,7 +38,7 @@ SDP 환경을 구축하기 위한 인증서버를 만들고 여기서 1차 인�
 - [API를 활용한 데모 프로젝트 설명](#api를-활용한-데모-프로젝트-설명)
 - [API 사용방법](#api-사용방법)
 
-### API 설명
+## API 설명
 
 API 파일은 두가지로 이루어져 있다.
 - index.js
@@ -884,27 +884,371 @@ app.post('/logout', (req, res) => {
    - 세션 삭제에 실패하면 로그를 기록하고 오류 메시지를 출력합니다.
    - 세션 삭제가 성공하면 로그를 기록하고 성공 메시지를 JSON 형식으로 반환합니다.
 
----
 
 
-
-
-
-### API를 활용한 데모 프로젝트 설명
+## API를 활용한 데모 프로젝트 설명
 
 해당 프로젝트에는 데모로 실행하기 위한 모바일 앱과 PC HTML 파일도 들어있다. 
 해당 파일들은 예시이며 참고용으로 사용하길 바란다.
+그대로 따라서 본인 코드에 넣으면 안될 것이다. 본인 코드에 맟춰 사용 바란다.
+여기에서는 API 호출 부분만 간략하게 설명 하도록 한다.
 
-#### 프로젝트 구성 (주요 폴더와 파일)
+### 프로젝트 구성 (주요 폴더와 파일)
 
 - api_download (API 사용시 다운로드, 데모 미사용)
 - data
     - login_info.csv (데모 사용 로그인 정보 - DB에 들어있는 내용)
-- login_api
-    - 
+- login_api (1/2차 인증 담당 API)
+    - index.js
+    - log.txt
+- mobile_otp_app (데모를 위한 플러터 모바일 앱)
+  - lib
+    - main.dart (모바일 1차 로그인 페이지)
+    - otp.dart (OTP 표시 페이지)
+- pc_login (PC 로그인 페이지와 홈페이지)
+  - page.js (홈페이지 라우팅 API)
+  - login.html (로그인 페이지)
+  - home.html (예시 홈페이지)
+
+`index.js`는 `localhost:3000`에서 호스팅하고
+`page.js`는 'localhost:4000'에서 호스팅 했다
+
+### 서비스 흐름
+1. 모바일에서 1차 로그인 한다.
+2. PC에서 1차 로그인 한다.
+3. 모바일에 OTP가 표시된다.
+4. PC에서 OTP 입력
+5. 홈페이지 접근 성공
+6. 홈페이지 로그아웃
+
+### 흐름에 따른 코드 설명
+
+### 모바일 1차 로그인 기능 (main.dart)
+```dart
+Future<void> login() async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:3000/mobile_login'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'id': controller.text,
+          'password': controller2.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        String userId = controller.text;
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => OTPPage(userId: userId)),
+          );
+        }
+      } else {
+        if (context.mounted) {
+          showSnackBar(context, const Text('로그인에 실패 했습니다'));
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showSnackBar(context, const Text('네트워크 오류가 발생했습니다. 다시 시도해 주세요.'));
+      }
+    }
+}
+```
+
+#### 설명
+- **기능**: 사용자가 입력한 ID와 비밀번호를 서버에 POST 요청하여 로그인 처리를 수행합니다.
+
+#### 동작 흐름
+1. **HTTP POST 요청**:
+   - `http.post`를 사용하여 로그인 정보를 서버에 전송합니다.
+   - 요청 URL: `http://10.0.2.2:3000/mobile_login`
+   - 요청 헤더에 `Content-Type`을 `application/json; charset=UTF-8`으로 설정합니다.
+   - 요청 본문에 사용자가 입력한 ID와 비밀번호를 JSON 형식으로 전송합니다.
+
+2. **응답 처리**:
+   - 서버의 응답 상태 코드가 200인 경우, 로그인 성공으로 간주하고 `userId`를 사용하여 `OTPPage`로 이동합니다.
+   - 상태 코드가 200이 아닌 경우, 로그인 실패 메시지를 스낵바로 표시합니다.
+
+3. **예외 처리**:
+   - 네트워크 오류가 발생한 경우, 관련 오류 메시지를 스낵바로 표시합니다.
+
+---
+
+### PC 1차 로그인 기능 (login.html)
+```javascript
+// 로그인 폼
+document.getElementById('loginForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const username = document.getElementById('id').value;
+    const password = document.getElementById('password').value;
+    const loginError = document.getElementById('login-error'); // 로그인 오류 메시지 요소
+    const mobileError = document.getElementById('mobile-error'); // 모바일 오류 메시지 요소
+
+    // 오류 메시지 초기화
+    loginError.style.display = 'none';
+    mobileError.style.display = 'none';
+
+    // 간단한 클라이언트 측 검증
+    fetch('http://localhost:3000/pc_login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: username, password: password })
+    })
+        .then(response => {
+            if (response.status === 200) {
+                // 로그인 성공
+                alert(`로그인 성공!`);
+                document.querySelector('.login-container').style.display = 'none';
+                document.querySelector('.otp-container').style.display = 'block';
+                userId = username;
+                // 타이머 시작
+                startTimer(); // 3분 타이머 시작
+            }
+            else if (response.status === 403) {
+                // 모바일 오류 처리
+                mobileError.style.display = 'block';
+                throw new Error('Mobile error');
+            } else if (response.status === 401) {
+                // 로그인 오류 처리
+                loginError.style.display = 'block';
+                throw new Error('Login error');
+            }
+            return response.json();
+        });
+});
+```
+
+#### 설명
+- **기능**: 로그인 폼을 처리하고 서버에 로그인 요청을 보내는 JavaScript 코드입니다.
+
+#### 동작 흐름
+1. **폼 제출 이벤트 리스너**:
+   - `submit` 이벤트가 발생하면 기본 동작을 방지하고, 사용자가 입력한 ID와 비밀번호를 가져옵니다.
+
+2. **오류 메시지 초기화**:
+   - 로그인 오류 메시지와 모바일 오류 메시지를 숨깁니다.
+
+3. **클라이언트 측 검증 및 서버 요청**:
+   - `fetch`를 사용하여 서버에 로그인 정보를 POST 방식으로 전송합니다.
+   - 요청 URL: `http://localhost:3000/pc_login`
+   - 요청 본문에 사용자 ID와 비밀번호를 JSON 형식으로 포함합니다.
+
+4. **응답 처리**:
+   - 서버의 응답 상태 코드에 따라 다음과 같이 처리합니다:
+     - **200**: 로그인 성공
+       - 성공 메시지를 알림으로 표시하고, 로그인 폼을 숨기며 OTP 입력 화면을 표시합니다.
+       - 사용자 ID를 저장하고 3분 타이머를 시작합니다.
+     - **403**: 모바일 오류
+       - 모바일 오류 메시지를 표시합니다.
+     - **401**: 로그인 오류
+       - 로그인 오류 메시지를 표시합니다.
+
+---
+
+### 모바일 OTP 표시 기능 (otp.dart)
+```dart
+Future<void> fetchOTP() async {
+    setState(() {
+      errorMessage = ''; // 오류 메시지 초기화
+      isLoading = true; // 로딩 시작
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+            'http://10.0.2.2:3000/get_otp/${widget.userId}'), // 서버의 로그인 API URL
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          otp = data['otp']; // 서버에서 받은 OTP
+          isLoading = false; // 로딩 완료
+        });
+      } else {
+        setState(() {
+          isLoading = false; // 로딩 완료
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = '오류 발생: $e';
+        isLoading = false; // 로딩 완료
+      });
+    }
+}
+```
+
+#### 설명
+- **기능**: 서버에서 OTP(일회용 비밀번호)를 가져오는 비동기 함수입니다.
+
+#### 동작 흐름
+1. **상태 초기화**:
+   - `setState`를 통해 오류 메시지를 초기화하고 로딩 상태를 `true`로 설정합니다.
+
+2. **HTTP GET 요청**:
+   - `http.get`을 사용하여 서버에 요청을 보냅니다.
+   - 요청 URL: `http://10.0.2.2:3000/get_otp/${widget.userId}` (사용자의 ID를 포함)
+
+3. **응답 처리**:
+   - 서버의 응답 상태 코드가 200인 경우:
+     - 응답 본문을 JSON 형식으로 파싱하여 OTP를 가져옵니다.
+     - 가져온 OTP를 상태에 저장하고 로딩 상태를 `false`로 설정합니다.
+   - 상태 코드가 200이 아닌 경우:
+     - 로딩 상태만 `false`로 설정합니다.
+
+4. **예외 처리**:
+   - 요청 중 오류가 발생한 경우, 오류 메시지를 설정하고 로딩 상태를 `false`로 변경합니다.
 
 
-### API 사용방법
+---
+
+### PC에서 2차인증 OTP를 검증 (login.html)
+```javascript
+// OTP 폼
+document.getElementById('otpForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const otp = document.getElementById('otp').value;
+    const otpError = document.getElementById('otp-error');
+
+    // id를 올바르게 설정되었는지 확인
+    fetch('http://localhost:3000/verify-otp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: userId, otp: otp }) // userId를 통해서 요청
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            console.log(data.token);
+            if (data.message === '성공') {
+                verifyToken(data.token);
+            } else {
+                otpError.style.display = 'block'; // 오류 메시지 표시
+                throw new Error('OTP 인증 실패');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error.message);
+        });
+});
+```
+
+#### 설명
+- **기능**: 사용자가 입력한 OTP(일회용 비밀번호)를 서버에 전송하여 인증하는 JavaScript 코드입니다.
+
+#### 동작 흐름
+1. **폼 제출 이벤트 리스너**:
+   - `submit` 이벤트가 발생할 때 기본 동작을 방지하고 사용자가 입력한 OTP 값을 가져옵니다.
+
+2. **서버 요청**:
+   - `fetch`를 사용하여 서버에 OTP 인증 요청을 보냅니다.
+   - 요청 URL: `http://localhost:3000/verify-otp`
+   - 요청 본문에 사용자 ID와 입력한 OTP를 JSON 형식으로 포함합니다.
+
+3. **응답 처리**:
+   - 서버의 응답을 JSON으로 파싱합니다.
+   - 응답 메시지가 `'성공'`인 경우:
+     - 인증 성공 시 `verifyToken` 함수를 호출하여 토큰을 처리합니다.
+   - 그렇지 않은 경우:
+     - 오류 메시지를 표시하고 오류를 발생시킵니다.
+
+4. **예외 처리**:
+   - 요청 중 오류가 발생한 경우, 오류 메시지를 콘솔에 출력합니다.
+
+---
+
+### OTP 인증 성공 시 토큰 발행 및 홈페이지로 리디렉팅 기능 (login.html)
+```javascript
+// 토큰 및 리디렉팅 함수
+function verifyToken(token) {
+    fetch('http://localhost:4000/home.html', {
+        method: 'GET',
+        headers: {
+            'Token': token
+        }
+    })
+        .then(response => {
+            if (response.ok) {
+                console.log('Token verified successfully');
+                const url = response.url;
+                window.location.href = url; // home.html로 디렉팅
+            } else {
+                console.error('Error verifying token:', response.status);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error.message);
+        });
+}
+```
+#### 설명
+- **기능**: 서버에 토큰을 검증하고, 성공적으로 검증된 경우 사용자를 홈 페이지로 리디렉션하는 함수입니다.
+
+#### 동작 흐름
+1. **토큰 검증 요청**:
+   - `fetch`를 사용하여 서버에 GET 요청을 보냅니다.
+   - 요청 URL: `http://localhost:4000/home.html`
+   - 요청 헤더에 `Token`을 포함하여 서버에 전송합니다.
+
+2. **응답 처리**:
+   - 서버의 응답이 성공적(`response.ok`)인 경우:
+     - 성공 메시지를 콘솔에 출력합니다.
+     - 응답의 URL을 가져와 해당 URL로 리디렉션합니다.
+   - 응답이 성공적이지 않은 경우:
+     - 오류 메시지를 콘솔에 출력합니다.
+
+3. **예외 처리**:
+   - 요청 중 오류가 발생한 경우, 오류 메시지를 콘솔에 출력합니다.
+
+---
+
+### 홈페이지 로그아웃 기능 (home.html)
+```javascript
+// 로그아웃 버튼 클릭 이벤트 처리
+document.getElementById('logoutBtn').addEventListener('click', function () {
+    fetch('/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            window.location.href = '/';
+        })
+        .catch(error => console.error('Error:', error.message));
+});
+```
+#### 설명
+- **기능**: 사용자가 로그아웃 버튼을 클릭할 때 서버에 로그아웃 요청을 보내고, 성공적으로 로그아웃되면 홈 페이지로 리디렉션하는 코드입니다.
+
+#### 동작 흐름
+1. **버튼 클릭 이벤트 리스너**:
+   - `logoutBtn` 요소에 클릭 이벤트 리스너를 추가합니다.
+
+2. **서버 로그아웃 요청**:
+   - `fetch`를 사용하여 `/logout` 경로에 POST 요청을 보냅니다.
+   - 요청 헤더에 `Content-Type`을 `application/json`으로 설정합니다.
+
+3. **응답 처리**:
+   - 서버의 응답을 JSON 형식으로 파싱합니다.
+   - 로그아웃이 성공적으로 처리되면, 사용자를 홈 페이지(`'/'`)로 리디렉션합니다.
+
+4. **예외 처리**:
+   - 요청 중 오류가 발생한 경우, 오류 메시지를 콘솔에 출력합니다.
+
+---
+
+## API 사용방법
 
 
 
