@@ -1250,5 +1250,80 @@ document.getElementById('logoutBtn').addEventListener('click', function () {
 
 ## API 사용방법
 
+### Node.js 다운로드 및 설치
+
+- **Node.js 다운로드 및 설치**
+  - Node.js 공식 웹사이트: [nodejs.org](https://nodejs.org)로 이동합니다.
+- **운영체제에 맞는 설치 파일**:
+  - Windows, macOS, 또는 Linux에 맞는 설치 파일을 다운로드합니다.
+- **설치**:
+  - 다운로드한 파일을 실행하여 설치 과정을 따릅니다. 대부분의 경우 기본값으로 진행하면 됩니다.
+
+**설치 확인**
+   - 설치가 완료되면, 터미널(명령 프롬프트)에서 다음 명령어를 입력하여 설치가 제대로 되었는지 확인합니다:
+
+```bash
+node -v
+npm -v
+```
+
+### 필요 npm 라이브러리 다운로드
+```bash
+npm init -y
+```
+
+```bash
+npm install express mysql2 body-parser cors jsonwebtoken
+```
+
+### db에 OTP 항목 테이블 생성
+```sql
+CREATE TABLE otp (
+    user VARCHAR() NOT NULL,  -- 사용자 ID
+    otp NUMBER() NOT NULL    -- OTP 값
+);
+```
+
+### 데이터베이스 연결 설정
+
+해당 예시는 `MySQL`이다. 본인 프로젝트에서 사용하는 DB로 변경하여 사용하기 바란다.
+
+```javascript
+// MySQL 데이터베이스 연결 설정
+// 다른 데이터베이스 사용 시 해당 내용 변경 필요
+const connection = mysql.createConnection({   // connection이라는 연결 변수 선언. 앞으로 db와의 연결은 connection으로 호출
+  host: 'localhost', // **알맞게 변경 **
+  user: 'root', // **알맞게 변경 **
+  password: '0000', // **알맞게 변경 **
+  database: 'my_login_db' // **알맞게 변경 **
+});
+```
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `host` | `string` | 데이터베이스 호스트 |
+| `user` | `string` | MySQL 사용자 이름|
+| `password` | `string` | MySQL 비밀번호 |
+| `databse` | `string` | 사용할 데이터베이스 이름 |
+
+### page.js 홈페이지 라우트 및 홈페이지 전달 함수 수정
+```javascript
+app.get('/home.html', (req, res) => { }
+```
+```javascript
+function handleHomePage(req, res) {
+    res.sendFile(path.join(__dirname, 'home.html'));
+}
+```
+`/home.html`로 되어있는 부분을 본인의 홈페이지 주소에 맞게 작성해준다.
+
+### 포트 설정 후 서버 운영
+
+`index.js`와 `page.js`의 포트를 각각 정해주고 서버를 실행 해주길 바란다.
+
+이후 기능 구현 및 사용하면 된다.
 
 
+## 마무리
+해당 프로젝트를 진행하면서 서버사이드 프로그래밍과 데모 시연을 위한 코딩을 통해 풀스택 개발자에 한발자국 다가갈 수 있었다고 생각한다. 
+
+SDP에 대한 개념과 이해도 또한 늘었으며 이 주제로 졸업프로젝트를 진행할 수 있도록 도와주신 담당교수 원유재 교수님한테 감사하고 종합설계 과목에서 프로젝트 방향성에 도움 주신 김영국 교수님 또한 감사드립니다.
