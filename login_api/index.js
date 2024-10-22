@@ -62,18 +62,6 @@ app.get('/', (req, res) => {
   res.send('인증 서버 실행 중');
 });
 
-// 사용자 데이터 조회 API
-app.get('/users', (req, res) => {
-  connection.query('SELECT * FROM user', (error, results) => {  // 사용하는 DB 문법에 맞게 수정
-    if (error) {
-      console.error('쿼리 실행 실패:', error);
-      res.status(500).send('쿼리 실행 실패');
-      return;
-    }
-    res.json(results); // 사용자 데이터를 JSON 형식으로 응답
-  });
-});
-
 // OTP 생성 함수 (무작위 4자리 숫자)
 function generateOTP() {
   return Math.floor(1000 + Math.random() * 9000).toString(); // 4자리 OTP 생성
