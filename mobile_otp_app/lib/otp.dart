@@ -98,7 +98,7 @@ class _OTPPageState extends State<OTPPage> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text('OTP Generator'),
+          title: const Text('OTP 생성기'),
           actions: [
             IconButton(
               icon: const Icon(Icons.logout), // 로그아웃 아이콘
@@ -115,12 +115,12 @@ class _OTPPageState extends State<OTPPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      'Your OTP is:',
+                      'OTP:',
                       style: TextStyle(fontSize: 24),
                     ),
                     const SizedBox(height: 20), // 간격 추가
                     Text(
-                      otp.isNotEmpty ? otp : 'No OTP generated', // OTP 값을 표시
+                      otp.isNotEmpty ? otp : '생성된 OTP 없음', // OTP 값을 표시
                       style: const TextStyle(
                           fontSize: 32, fontWeight: FontWeight.bold),
                     ),
@@ -133,7 +133,7 @@ class _OTPPageState extends State<OTPPage> {
                     const SizedBox(height: 20), // 간격 추가
                     ElevatedButton(
                       onPressed: fetchOTP, // 버튼 클릭 시 fetchOTP 호출
-                      child: const Text('Refresh OTP'), // 버튼 텍스트
+                      child: const Text('OTP 재생성'), // 버튼 텍스트
                     ),
                   ],
                 ),

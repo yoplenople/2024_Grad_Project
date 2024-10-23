@@ -88,7 +88,7 @@ class _MyHomePageState extends State<IDPWLoginPage> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text('ID/PW Login Page'),
+          title: const Text('로그인 페이지'),
           elevation: 0.0,
           backgroundColor: Colors.blue,
           centerTitle: true,
@@ -119,13 +119,13 @@ class _MyHomePageState extends State<IDPWLoginPage> {
                               controller: controller,
                               autofocus: true,
                               decoration:
-                                  const InputDecoration(labelText: 'Enter ID'),
+                                  const InputDecoration(labelText: '아이디'),
                               keyboardType: TextInputType.emailAddress,
                             ),
                             TextField(
                               controller: controller2,
                               decoration:
-                                  const InputDecoration(labelText: 'Enter PW'),
+                                  const InputDecoration(labelText: '비밀번호'),
                               keyboardType: TextInputType.text,
                               obscureText: true,
                             ),
