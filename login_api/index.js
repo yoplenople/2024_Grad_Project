@@ -237,7 +237,7 @@ app.get('/get_otp/:id', (req, res) => {
 
 // 서버 시작
 app.listen(PORT, '0.0.0.0', () => {
-  logAction('-----서버-----', '서버 재실행', '성공', '');
+  logAction('-----서버-----', '서버 실행', '성공', '');
   console.log(`서버가 http://localhost:${PORT}에서 실행 중입니다.`);
 
   // 서버 시작 시 모든 유저의 is_logged_in을 false로 업데이트
